@@ -17,5 +17,4 @@ export default class babyShow extends Component {
     );
   }
 }
-
 AppRegistry.registerComponent('babyShow', () => babyShow);
