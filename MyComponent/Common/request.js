@@ -1,5 +1,6 @@
 'use strict';
 
+// 工具类
 import Mock from 'mockjs';
 import queryString from 'query-string';
 import _ from 'lodash';
