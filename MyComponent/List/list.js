@@ -13,6 +13,8 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl
 } from 'react-native';
 // 引入图标库
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -20,10 +22,16 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var Dimensions = require('Dimensions');
 const {width,height} = Dimensions.get('window');
 
-
 // request
 import config from '../Common/config';
 import request from '../Common/request';
+
+// 数据缓存
+let cachedResults={
+  nextPage:1,
+  items:[],
+  total:0
+};
 
 export default class list extends Component {
   constructor(props) {
@@ -31,7 +39,9 @@ export default class list extends Component {
     this.state={
       dataSource:new ListView.DataSource({
         rowHasChanged:(r1,r2)=>r1!==r2,
-      })
+      }),
+      isLoading:false,
+      isRefreshing:false
     }
   }
   render() {
@@ -50,24 +60,115 @@ export default class list extends Component {
           style={styles.listView}
           onEndReached={this._fetchMoreData}
           onEndReachedThreshold={20}
-        >
+          // 上拉加载更多底部动画
+          renderFooter={this._renderFooter}
 
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.isRefreshing}
+              onRefresh={this._onRefresh}
+            />
+          }
+        >
         </ListView>
       </View>
     );
   }
 
-  // 上拉加载更多
-  _fetchMoreData = () => {
-    if (!this._hasMore() ) {
-       return
+  _onRefresh = ()=> {
+    if (!this._hasMore() || this.state.isRefreshing){
+      return
     }
+    this._fetchData(1)
   };
 
+  // 上拉加载更多
+  _fetchMoreData = () => {
+    // 没有更多的数据 || 正在加载
+    if (!this._hasMore() || this.state.isLoading) {
+       return
+    }
+    // 去服务器加载更多数据
+    this._fetchData(cachedResults.nextPage)
+  };
+  // 是否还有更多的数据
   _hasMore() {
-
+    return cachedResults.items.length !== cachedResults.total
   }
 
+  componentWillMount() {
+    // 加载本地缓存数据
+    this._dsFetchData()
+  }
+  componentDidMount() {
+    // 加载网络数据
+    this._fetchData(1)
+  }
+
+  // 加载网络数据
+  _fetchData(page) {
+
+    if (page !== 1) {
+      // 修改状态机
+      this.setState({
+        isLoading:true // 正在加载
+      });
+    } else {
+      // 修改状态机
+      this.setState({
+        isRefreshing:true
+      });
+    }
+
+    // 发送网络请求
+    request.get(config.api.baseUrl + config.api.list,{
+      accessToken:"joeyoungtest",
+      page:page
+    }).then(
+      (data) => {
+        if (data.success) {
+
+          if (page !== 1) {
+             
+          }
+
+          // 将服务器得到的数据缓存
+          cachedResults.items = cachedResults.items.concat(data.data);
+          cachedResults.total = data.total;
+          cachedResults.nextPage += 1;
+          this.setState({
+            // 更新数据
+            dataSource:this.state.dataSource.cloneWithRows(cachedResults.items),
+            // 还原状态
+            isLoading:false,
+          })
+        }
+      }
+    ).catch((error) => {
+      console.error(error);
+    });
+  }
+
+  // 加载本地缓存数据
+  _dsFetchData() {
+    this.setState({
+      dataSource:this.state.dataSource.cloneWithRows([
+        {
+          "id":"410000198702238412","thumb":"http://dummyimage.com/1280x720/2589ee)","title":"@cparagraph(1, 3)","video":"http://v.youku.com/v_show/id_XMjk0MTU1MjA0MA==.html?spm=a2hww.20027244.ykRecommend.5~5~5~5~A"
+        }
+        ,
+        {
+          "id":"650000197803011428","thumb":"http://dummyimage.com/1280x720/946afe)","title":"@cparagraph(1, 3)","video":"http://v.youku.com/v_show/id_XMjk0MTU1MjA0MA==.html?spm=a2hww.20027244.ykRecommend.5~5~5~5~A"
+        }
+        ,
+        {
+          "id":"430000198906061923","thumb":"http://dummyimage.com/1280x720/a017bb)","title":"@cparagraph(1, 3)","video":"http://v.youku.com/v_show/id_XMjk0MTU1MjA0MA==.html?spm=a2hww.20027244.ykRecommend.5~5~5~5~A"
+        }
+      ])
+    });
+  }
+
+  // 渲染cell
   _renderRow = (rowData) => {
     return(
       <TouchableOpacity>
@@ -107,52 +208,21 @@ export default class list extends Component {
       </TouchableOpacity>
     )
   };
-  componentWillMount() {
-    // 加载本地数据
-    this._dsFetchData();
-  }
-  componentDidMount() {
-    // 加载网络数据
-    this._fetchData();
-  }
 
-  // 加载本地缓存数据
-  _dsFetchData() {
-    this.setState({
-      dataSource:this.state.dataSource.cloneWithRows([
-        {
-          "id":"410000198702238412","thumb":"http://dummyimage.com/1280x720/2589ee)","title":"@cparagraph(1, 3)","video":"http://v.youku.com/v_show/id_XMjk0MTU1MjA0MA==.html?spm=a2hww.20027244.ykRecommend.5~5~5~5~A"
-        }
-        ,
-        {
-          "id":"650000197803011428","thumb":"http://dummyimage.com/1280x720/946afe)","title":"@cparagraph(1, 3)","video":"http://v.youku.com/v_show/id_XMjk0MTU1MjA0MA==.html?spm=a2hww.20027244.ykRecommend.5~5~5~5~A"
-        }
-        ,
-        {
-          "id":"430000198906061923","thumb":"http://dummyimage.com/1280x720/a017bb)","title":"@cparagraph(1, 3)","video":"http://v.youku.com/v_show/id_XMjk0MTU1MjA0MA==.html?spm=a2hww.20027244.ykRecommend.5~5~5~5~A"
-        }
-        ])
-    });
+  // 自定义Footer视图
+  _renderFooter = ()=> {
+    if(!this._hasMore()) {
+      return(
+        <View style={styles.loadingMore}>
+          <Text style={styles.loadingText}>没有更多的数据了...</Text>
+        </View>
+      )
+    }
+    // 显示小菊花
+    return(
+      <ActivityIndicator style={styles.loadingMore}/>
+    )
   }
-
-  // 加载网络数据
-  _fetchData() {
-     // 发送网络请求
-     request.get(config.api.baseUrl + config.api.list,{
-       accessToken:"joeyoungtest"
-     }).then(
-       (data) => {
-         if (data.success) {
-           this.setState({
-             dataSource:this.state.dataSource.cloneWithRows(data.data)
-           })
-         }
-       }
-     ).catch((error) => {
-       console.error(error);
-     });
-  }
-
 
 }
 
@@ -177,6 +247,7 @@ const styles = StyleSheet.create({
   listView:{
 
   },
+  // cell
   cellStyle:{
     width:width,
     marginTop:10,
@@ -192,6 +263,7 @@ const styles = StyleSheet.create({
     height:width*0.56,
     resizeMode:'cover',
   },
+  // 播放按钮
   play:{
     position:'absolute',
     bottom:14,
@@ -225,6 +297,15 @@ const styles = StyleSheet.create({
     fontSize:18,
     color:"#333",
     paddingLeft:12,
+  },
+  // 加载动画
+  loadingMore:{
+    marginVertical:20
+  },
+  loadingText:{
+    fontSize:18,
+    color:'#777',
+    textAlign:'center'
   }
 });
 
