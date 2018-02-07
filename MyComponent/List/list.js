@@ -40,7 +40,7 @@ export default class list extends Component {
       dataSource:new ListView.DataSource({
         rowHasChanged:(r1,r2)=>r1!==r2,
       }),
-      isLoading:false,
+      isLoadingMore:false,
       isRefreshing:false
     }
   }
@@ -62,7 +62,7 @@ export default class list extends Component {
           onEndReachedThreshold={20}
           // 上拉加载更多底部动画
           renderFooter={this._renderFooter}
-
+          // 下拉刷新
           refreshControl={
             <RefreshControl
               refreshing={this.state.isRefreshing}
@@ -75,21 +75,23 @@ export default class list extends Component {
     );
   }
 
+  // 下拉刷新
   _onRefresh = ()=> {
     if (!this._hasMore() || this.state.isRefreshing){
       return
     }
-    this._fetchData(1)
+    this._fetchData(1);
   };
 
   // 上拉加载更多
   _fetchMoreData = () => {
     // 没有更多的数据 || 正在加载
-    if (!this._hasMore() || this.state.isLoading) {
+    if (!this._hasMore() || this.state.isLoadingMore) {
        return
     }
     // 去服务器加载更多数据
     this._fetchData(cachedResults.nextPage)
+
   };
   // 是否还有更多的数据
   _hasMore() {
@@ -108,16 +110,15 @@ export default class list extends Component {
   // 加载网络数据
   _fetchData(page) {
 
-    if (page !== 1) {
-      // 修改状态机
+    // 修改状态机
+    if (page === 1) {
       this.setState({
-        isLoading:true // 正在加载
-      });
+        isRefreshing:true  // 刷新
+      })
     } else {
-      // 修改状态机
       this.setState({
-        isRefreshing:true
-      });
+        isLoadingMore:true // 正在加载更多
+      })
     }
 
     // 发送网络请求
@@ -128,25 +129,49 @@ export default class list extends Component {
       (data) => {
         if (data.success) {
 
-          if (page !== 1) {
-             
+          // 将服务器得到的数据缓存
+          // 拷贝对象生成一个新数组
+          let items = cachedResults.items.slice(0);
+          if (page === 1) {// 刷新
+            items = data.data.concat(items);
+            cachedResults.nextPage = 1;
+          } else {
+            items = items.concat(data.data);
+            cachedResults.nextPage += 1;
           }
 
-          // 将服务器得到的数据缓存
-          cachedResults.items = cachedResults.items.concat(data.data);
+          cachedResults.items = items;
           cachedResults.total = data.total;
-          cachedResults.nextPage += 1;
-          this.setState({
-            // 更新数据
-            dataSource:this.state.dataSource.cloneWithRows(cachedResults.items),
-            // 还原状态
-            isLoading:false,
-          })
+          if (page === 1) {// 刷新
+            this.setState({
+              // 更新数据
+              dataSource:this.state.dataSource.cloneWithRows(cachedResults.items),
+              // 还原状态
+              isRefreshing:false
+            })
+          } else {
+            this.setState({
+              // 更新数据
+              dataSource:this.state.dataSource.cloneWithRows(cachedResults.items),
+              // 还原状态
+              isLoadingMore:false
+            })
+          }
         }
       }
-    ).catch((error) => {
-      console.error(error);
-    });
+    ).catch(
+      (error) => {
+        if (page === 1) {
+          this.setState({
+            isRefreshing:false
+          })
+        } else {
+          this.setState({
+            isLoadingMore:false
+          })
+        }
+        console.error("error:"+error);
+      });
   }
 
   // 加载本地缓存数据
@@ -237,7 +262,7 @@ const styles = StyleSheet.create({
     backgroundColor:"#dddddd",
     borderBottomWidth:0.5,
     borderBottomColor:'black',
-    marginTop:Platform.OS == 'ios' ? 20:0
+    marginTop:Platform.OS === 'ios' ? 20:0
   },
   headerText:{
     fontSize:16,
