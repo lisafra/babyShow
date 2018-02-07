@@ -17,10 +17,13 @@ import {
 
 // item
 import ListItem from './listItem';
+// 详情页
+import Detail from './detail';
+
 
 // request
-import config from '../Common/config';
 import request from '../Common/request';
+import config from '../Common/config';
 
 // 数据缓存
 let cachedResults={
@@ -169,9 +172,27 @@ export default class list extends Component {
   // 渲染item
   _renderRow = (rowData) => {
     return(
-      <ListItem rowData={rowData} />
+      <ListItem rowData={rowData} 
+                onSelect={()=>this._loadPage(rowData)}
+      />
     )
   };
+
+// 通过导航控制器跳转到详情页
+  _loadPage(rowData) {
+    /*
+      因为当前的List组件是在Navigator包裹下的，
+      所以可以通过this.props.navigator取到导航控制器
+    */
+    let {navigator} = this.props;
+    if (navigator) {
+      navigator.push({
+        name:'detail',
+        component:Detail
+      })
+    }
+  }
+
 
   // 自定义Footer视图
   _renderFooter = ()=> {

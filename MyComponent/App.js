@@ -12,6 +12,7 @@ import Edit from './Edit/edit';
 import List from './List/list';
 import Picture from './Picture/picture';
 import QYTabBar from './QYTabBar';
+
 // 引入导航
 import {Navigator} from 'react-native-deprecated-custom-components';
 // 引入tab-view
@@ -36,7 +37,33 @@ export default class App extends Component {
         scrollWithoutAnimation={true}
         locked={true}
       >
-        <List tabLabel="list"/>
+        <Navigator
+          tabLabel="list"
+          initialRoute={{component:List,name:'list',
+            params:{
+              title:'视频列表'
+            }}}
+          renderScene={
+             (route, navigator) =>
+               <route.component {...route.params} navigator={navigator} />
+          }
+          // configureScene={
+          //   (route, routeStack) =>
+          //     Navigator.SceneConfigs.FloatFromRight
+          // }
+          // 上面的方法和下面效果一样,下面的函数更利于展开参数进行操作
+          configureScene={
+            (route, routeStack) => {
+              return ({
+                // 通过修改源码关闭拖拽pop的功能
+                ...Navigator.SceneConfigs.FloatFromRight,
+                gestures:{
+                  pop:null
+                }
+            })
+            }
+          }
+        />
         <Edit tabLabel="edit"/>
         <Picture tabLabel="picture"/>
         <Account tabLabel="account"/>
