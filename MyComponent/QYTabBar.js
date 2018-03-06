@@ -25,7 +25,7 @@ export default class QYTabBar extends Component {
     activeTab: PropTypes.number,                   // 选中的下标
     tabs: PropTypes.array,                         // tabs的集合,类似iOS中items的数组
     // 扩展自定义的一些属性
-    tabNames:  PropTypes.array,                    // Item的名称
+    tabNames: PropTypes.array,                     // Item的名称
     tabIconNames: PropTypes.array,                 // Item图片的名称
   };
 

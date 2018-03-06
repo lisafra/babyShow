@@ -47,22 +47,22 @@ export default class App extends Component {
              (route, navigator) =>
                <route.component {...route.params} navigator={navigator} />
           }
-          // configureScene={
-          //   (route, routeStack) =>
-          //     Navigator.SceneConfigs.FloatFromRight
-          // }
-          // 上面的方法和下面效果一样,下面的函数更利于展开参数进行操作
           configureScene={
-            (route, routeStack) => {
-              return ({
-                // 通过修改源码关闭拖拽pop的功能
-                ...Navigator.SceneConfigs.FloatFromRight,
-                gestures:{
-                  pop:null
-                }
-            })
-            }
+            (route, routeStack) =>
+              Navigator.SceneConfigs.FloatFromRight
           }
+          // 上面的方法和下面效果一样,下面的函数更利于展开参数进行操作
+          // configureScene={
+          //   (route, routeStack) => {
+          //     return ({
+          //       // 通过修改源码关闭拖拽pop的功能
+          //       ...Navigator.SceneConfigs.FloatFromRight,
+          //       gestures:{
+          //         pop:null
+          //       }
+          //   })
+          //   }
+          // }
         />
         <Edit tabLabel="edit"/>
         <Picture tabLabel="picture"/>

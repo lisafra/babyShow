@@ -20,7 +20,6 @@ import ListItem from './listItem';
 // 详情页
 import Detail from './detail';
 
-
 // request
 import request from '../Common/request';
 import config from '../Common/config';
@@ -187,8 +186,10 @@ export default class list extends Component {
     let {navigator} = this.props;
     if (navigator) {
       navigator.push({
-        name:'detail',
-        component:Detail
+        component:Detail,
+        params:{
+          rowData:rowData
+        }
       })
     }
   }

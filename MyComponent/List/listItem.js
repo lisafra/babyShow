@@ -88,7 +88,9 @@ export default class ListItem extends Component {
                     style={this.state.up ? styles.upStyle:styles.downStyle}
               />
               {/*点赞文字*/}
-              <Text style={this.state.up ? styles.boxTextSelected:styles.boxText}>点赞</Text>
+              <Text style={this.state.up ? styles.boxTextSelected:styles.boxText}
+                    onPress={this._up}>点赞
+              </Text>
             </View>
             {/*评论*/}
             <View style={styles.footerBox}>
