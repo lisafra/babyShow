@@ -65,6 +65,7 @@ export default class ListItem extends Component {
 
   render() {
     let rowData = this.state.rowData;
+
     return (
       <TouchableOpacity onPress={this.props.onSelect}>
         {/*整个cell*/}
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     paddingTop:9,
     paddingLeft:18,
     backgroundColor:'transparent',
-    borderColor:'#ddd',
+    borderColor:'black',
     borderWidth:1,
     borderRadius:23,
   },

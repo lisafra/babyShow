@@ -6,6 +6,7 @@ const config = {
     baseUrl:'http://rapapi.org/mockjs/31504/',  // base
     list:'api/list',                            // 列表
     up:'api/up',                                // 点赞
+    comments:'api/comments',                    // 评论
   },
   map:{
     method: 'POST',
