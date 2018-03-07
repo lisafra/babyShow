@@ -93,7 +93,7 @@ export default class list extends Component {
   };
   // 是否还有更多的数据
   _hasMore() {
-    return cachedResults.items.length !== cachedResults.total
+    return cachedResults.items.length < cachedResults.total
   }
 
   componentDidMount() {

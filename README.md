@@ -103,8 +103,7 @@ _fetchMoreData = () => {
 };
 // 是否还有更多的数据
 _hasMore() {
-  //
-  return cachedResults.items.length !== cachedResults.total
+  return cachedResults.items.length < cachedResults.total
 }
 ```
 d). 数据回来之后逻辑处理
@@ -401,32 +400,29 @@ a). 给视频详情页添加了导航
 ```
 b). 给视频详情页添加作者信息
 * 我在之前的接口中又加入了几个字段来表示作者信息![](http://upload-images.jianshu.io/upload_images/3265534-afb3dc0de4c99b47.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-* 作者信息代码实现（css请查看源码）：
+* 因为评论要以列表的形式展示出来，视频作者信息是要能跟着列表一起滚动的，所以把该模块放在列表的Header上，作者信息代码实现（css请查看源码）：
 ```
-{/* 底部内容 */}
-<ScrollView
-  enableEmptySections={true}
-  automaticallyAdjustContentInsets={false}
-  showsVerticalScrollIndicator={false}
->
-  {/* 视频信息 */}
-  <View style={styles.info_infoBox}
-  >
-    <Image
-      style={styles.info_avatar}
-      source={{uri:rowData.author.avatar}}
-    />
-    <View style={styles.info_descBox}>
-      <Text style={styles.info_nickname}>作者：{rowData.author.nickname}</Text>
-      <Text style={styles.info_title}>标题：{rowData.title}</Text>
+// 自定义Header视图
+_renderHeader = ()=> {
+  let rowData = this.state.rowData;
+  return (
+    // 视频作者信息
+    <View style={styles.info_infoBox}
+    >
+      <Image
+        style={styles.info_avatar}
+        source={{uri:rowData.author.avatar}}
+      />
+      <View style={styles.info_descBox}>
+        <Text style={styles.info_nickname}>作者：{rowData.author.nickname}</Text>
+        <Text style={styles.info_title}>标题：{rowData.title}</Text>
+      </View>
     </View>
-  </View>
-</ScrollView>
+  )
+};
 ```
-效果如下:         
-![](http://upload-images.jianshu.io/upload_images/3265534-cee7a09313648fe9.gif?imageMogr2/auto-orient/strip)
 #### (10) 处理评论信息的展示
-a). 在视频信息 `ScrollView` 组件内部加入评论信息的 `ListView` 组件
+a). 在视频信息 `render` 函数内部加入评论信息的 `ListView` 组件（带加载更多功能，此处不再说明，同`list.js` 中的加载更多一样）
 ```
 {/* 评论信息 */}
 <ListView
@@ -434,14 +430,18 @@ a). 在视频信息 `ScrollView` 组件内部加入评论信息的 `ListView` �
   renderRow={this._renderRow}
   enableEmptySections={true}
   automaticallyAdjustContentInsets={false}
-  showsVerticalScrollIndicator={false}
+  renderHeader={this._renderHeader}
+  onEndReached={this._fetchMoreData}
+  onEndReachedThreshold={20}
+  // 上拉加载更多底部动画
+  renderFooter={this._renderFooter}
 />
 ```
-b). 创建评论列表的接口：![](http://upload-images.jianshu.io/upload_images/3265534-06ece00d8f160b4c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+b). 创建评论列表的接口：    
+![](http://upload-images.jianshu.io/upload_images/3265534-fb46d60109b72cd4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)     
 c). 在 `componentDidMount` 生命周期函数中发送请求，绘制item.      
 效果如下：     
-![](http://upload-images.jianshu.io/upload_images/3265534-0a8da4fd1f2d69c2.gif?imageMogr2/auto-orient/strip)
-
+![](http://upload-images.jianshu.io/upload_images/3265534-24aebfa5d476b1f8.gif?imageMogr2/auto-orient/strip)
 
 
 * * *

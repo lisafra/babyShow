@@ -28,6 +28,13 @@ import config from '../Common/config';
 var Dimensions = require('Dimensions');
 const {width} = Dimensions.get('window');
 
+// 数据缓存
+let cachedResults={
+  nextPage:1,
+  items:[],
+  total:0
+};
+
 export default class Detail extends Component {
   constructor(props) {
     super(props);
@@ -56,10 +63,11 @@ export default class Detail extends Component {
       playEnd:false,
       // 视频加载失败
       videoError:false,
-
+      // 评论参数
       dataSource:new ListView.DataSource({
         rowHasChanged:(r1,r2)=>r1!==r2,
       }),
+      isLoadingMore:false,
     }
 
   }
@@ -153,64 +161,122 @@ export default class Detail extends Component {
             <View style={[styles.video_innerProgressRemaining, {flex: flexRemaining}]} />
           </View>
         </View>
-        {/* 底部内容 */}
-        <ScrollView
+        {/* 评论信息 */}
+        <ListView
+          dataSource={this.state.dataSource}
+          renderRow={this._renderRow}
           enableEmptySections={true}
           automaticallyAdjustContentInsets={false}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* 视频信息 */}
-          <View style={styles.info_infoBox}
-          >
-            <Image
-              style={styles.info_avatar}
-              source={{uri:rowData.author.avatar}}
-            />
-            <View style={styles.info_descBox}>
-              <Text style={styles.info_nickname}>作者：{rowData.author.nickname}</Text>
-              <Text style={styles.info_title}>标题：{rowData.title}</Text>
-            </View>
-          </View>
-          {/* 评论信息 */}
-          <ListView
-            dataSource={this.state.dataSource}
-            renderRow={this._renderRow}
-            enableEmptySections={true}
-            automaticallyAdjustContentInsets={false}
-            showsVerticalScrollIndicator={false}
-          />
-        </ScrollView>
-
+          renderHeader={this._renderHeader}
+          onEndReached={this._fetchMoreData}
+          onEndReachedThreshold={20}
+          // 上拉加载更多底部动画
+          renderFooter={this._renderFooter}
+        />
       </View>
     )
   }
 
   componentDidMount() {
     // 从服务端获取数据
-    this._fetchData();
+    this._fetchData(1);
   }
-  _fetchData() {
+  _fetchData(page) {
+
+    // 修改状态机
+    this.setState({
+      isLoadingMore:true // 正在加载更多
+    });
+
     // 发送网络请求
     request.get(config.api.baseUrl + config.api.comments,{
-      id:123,
+      id:"123456",
       accessToken:"joeyoungtest",
+      page:page
     }).then(
       (data) => {
         if (data.success) {
-          let commentsList = data.data;
-          if (commentsList && commentsList.length > 0) {
-            this.setState({
-              dataSource:this.state.dataSource.cloneWithRows(commentsList)
-            })
+
+          // 将服务器得到的数据缓存
+          // 拷贝对象生成一个新数组
+          let items = cachedResults.items.slice(0);
+          if (page === 1) {// 刷新
+            items = data.data.concat(items);
+            cachedResults.nextPage = 1;
+          } else {
+            items = items.concat(data.data);
+            cachedResults.nextPage += 1;
           }
+
+          cachedResults.items = items;
+          cachedResults.total = data.total;
+
+          this.setState({
+            // 更新数据
+            dataSource:this.state.dataSource.cloneWithRows(cachedResults.items),
+            // 还原状态
+            isLoadingMore:false
+          })
         }
       }
     ).catch(
       (error) => {
+        this.setState({
+          isLoadingMore:false
+        })
         console.error("error:"+error);
       }
     );
   }
+
+  // 自定义Header视图
+  _renderHeader = ()=> {
+    let rowData = this.state.rowData;
+    return (
+      // 视频作者信息
+      <View style={styles.info_infoBox}
+      >
+        <Image
+          style={styles.info_avatar}
+          source={{uri:rowData.author.avatar}}
+        />
+        <View style={styles.info_descBox}>
+          <Text style={styles.info_nickname}>作者：{rowData.author.nickname}</Text>
+          <Text style={styles.info_title}>标题：{rowData.title}</Text>
+        </View>
+      </View>
+    )
+  };
+
+  // 自定义Footer视图
+  _renderFooter = ()=> {
+    if(!this._hasMore()) {
+      return(
+        <View style={styles.loadingMore}>
+          <Text style={styles.loadingText}>没有更多的数据了...</Text>
+        </View>
+      )
+    }
+    // 显示小菊花
+    return(
+      <ActivityIndicator style={styles.loadingMore}/>
+    )
+  };
+  // 上拉加载更多
+  _fetchMoreData = () => {
+    // 没有更多的数据 || 正在加载
+    if (!this._hasMore() || this.state.isLoadingMore) {
+      return
+    }
+    // 去服务器加载更多数据
+    this._fetchData(cachedResults.nextPage)
+
+  };
+  // 是否还有更多的数据
+  _hasMore() {
+    return cachedResults.items.length < cachedResults.total
+  }
+
   // 处理item
   _renderRow =(rowData)=> {
     return (
@@ -485,6 +551,15 @@ const styles = StyleSheet.create({
     marginTop:8,
     fontSize:14,
     color:'#666'
+  },
+  // 评论加载动画
+  loadingMore:{
+    marginVertical:20
+  },
+  loadingText:{
+    fontSize:18,
+    color:'#777',
+    textAlign:'center'
   }
 
 });
