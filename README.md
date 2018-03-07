@@ -4,8 +4,7 @@
 #### 初始化一个项目:
 
 ```
-react-native init babyShow --version 0.44.3
-
+$ react-native init babyShow --version 0.44.3
 ```
 #### 划分模块
 在根目录新建一个 `MyComponent` 文件夹，存放实现App功能的文件。  
@@ -55,19 +54,19 @@ $ react-native link
 #####（1）使用 `ListView` 组件创建列表：（实现细节请看源码）  
 #####（2）列表展示暂时没有真实接口,使用[RAP](http://rapapi.org/org/index.do)模拟假的接口,借用[Mock](http://mockjs.com/)语法,模拟了假数据;在项目中 `npm install mockjs --save` 安装mockjs.
 #####（3）封装请求类：
-* a).对请求类进行封装,在 `MyComponent` 文件夹下创建 `Common` 文件;  
-* b).在 `Common` 文件夹下创建 `config.js` :处理post请求的一些基类参数;  
-* c).在 `Common` 文件夹下创建 `request.js` :处理 POST/GET 请求;  
-* d).`npm isntall query-string --save`:把参数拼接到get请求url上的工具;   
-* e).`npm install lodash --save`:合并json工具.
+* a). 对请求类进行封装,在 `MyComponent` 文件夹下创建 `Common` 文件;  
+* b). 在 `Common` 文件夹下创建 `config.js` :处理post请求的一些基类参数;  
+* c). 在 `Common` 文件夹下创建 `request.js` :处理 POST/GET 请求;  
+* d). `npm isntall query-string --save`:把参数拼接到get请求url上的工具;   
+* e). `npm install lodash --save`:合并json工具.
 
 完成之后的效果:  
 ![](http://upload-images.jianshu.io/upload_images/3265534-85d32527f647988f.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-#####（4） 添加下拉加载更多效果：
+#####（4）添加下拉加载更多效果：
 为了实现分页效果，我在之前rap定义的接口中加入了两个字段。![](http://upload-images.jianshu.io/upload_images/3265534-33bf8cf2b65aaf0f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
- a).加入加载更多方法
+ a). 加入加载更多方法
 ```
 // 代码中加入上拉加载更多
 <ListView
@@ -79,7 +78,7 @@ $ react-native link
 >
 </ListView>
 ```
-b).初始化一个对象记录我们的参数:
+b). 初始化一个对象记录我们的参数:
 ```
  // 数据缓存
 let cachedResults={
@@ -91,7 +90,7 @@ let cachedResults={
   total:0
 };
 ```
- c).实现加载更多的函数
+ c). 实现加载更多的函数
 ```
 // 上拉加载更多
 _fetchMoreData = () => {
@@ -108,7 +107,7 @@ _hasMore() {
   return cachedResults.items.length !== cachedResults.total
 }
 ```
-d).数据回来之后逻辑处理
+d). 数据回来之后逻辑处理
 ```
   // 修改状态机
   this.setState({
@@ -129,7 +128,7 @@ d).数据回来之后逻辑处理
         }
  ...
 ```
-e).添加底部加载动画
+e). 添加底部加载动画
 引入 `ActivityIndicator` 组件;  
 在 `ListView` 中加入 `renderFooter={this._renderFooter}`；
 实现 `_renderFooter`函数;
@@ -149,9 +148,9 @@ _renderFooter = ()=> {
   )
 }
 ```
-##### (5) 添加下拉刷新逻辑：
-a).在构造函数中给状态机添加参数 `isRefreshing:false` 记录是否正在下拉刷新；
-b).加入下拉刷新组件 `refreshControl`
+##### （5）添加下拉刷新逻辑：
+a). 在构造函数中给状态机添加参数 `isRefreshing:false` 记录是否正在下拉刷新；
+b). 加入下拉刷新组件 `refreshControl`
 ```
 在ListView中实现函数：
 ...
@@ -163,7 +162,7 @@ refreshControl={
   />
 }
 ```  
-c).实现下拉刷新的函数
+c). 实现下拉刷新的函数
 ```
 // 下拉刷新
 _onRefresh = ()=> {
@@ -173,7 +172,7 @@ _onRefresh = ()=> {
   this._fetchData(1);
 };
 ```
-d).数据回来之后逻辑处理(和上拉加载更多整合在了一起)
+d). 数据回来之后逻辑处理(和上拉加载更多整合在了一起)
 ```
 // 修改状态机
 if (page === 1) {
@@ -217,9 +216,230 @@ if (page === 1) {// 刷新
 ...
 ```
 效果如下：  
+![](http://upload-images.jianshu.io/upload_images/3265534-bb9d517348750db0.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-![](http://upload-images.jianshu.io/upload_images/3265534-870eff3868a9f091.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+##### （6） item上面的逻辑处理：
+上面的功能实现完之后，整个 `list.js` 文件是相当冗余的。把 `listView` 里面渲染cell的模块单独抽取出来为 `listItem.js`，详情请看我代码中的该文件。
 
+a). 点赞功能的实现:
+* 在rap上面定义点赞接口 `api/up`  
+![](http://upload-images.jianshu.io/upload_images/3265534-213aa1aea48ea4cd.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+
+* 添加接口到 `config.js`中：
+```
+api:{
+  baseUrl:'http://rapapi.org/mockjs/31504/',  // base
+  list:'api/list',                            // 列表
+  up:'api/up',                                // 点赞
+},
+```
+* 在  `listItem.js` 文件中给点赞的图标Icon和文字添加 `onPress` 事件,实现 `_up` 函数，根据样式的改变修改对应的`style`和图片的`name`属性；具体实现细节请查看代码。  
+ 效果如下：![](http://upload-images.jianshu.io/upload_images/3265534-5d28081e238d83fb.gif?imageMogr2/auto-orient/strip)
+
+#####（）点击item进入视频详情页
+a). 之前的页面是没有加导航的。现在在 `App.js` 文件中加入 `Navigator`，实现导航的逻辑(根视图为 `List` 组件)：
+```
+<Navigator
+  tabLabel="list"
+  initialRoute={{component:List,name:'list',
+    params:{
+      title:'视频列表'
+    }}}
+  renderScene={
+     (route, navigator) =>
+       <route.component {...route.params} navigator={navigator} />
+  }
+  configureScene={
+    (route, routeStack) =>
+      Navigator.SceneConfigs.FloatFromRight
+  }
+/>
+```
+b). 创建 `detail.js` 处理详情逻辑。
+c). 添加push到 `Detail` 组件(即 `detail.js`)的逻辑：  
+* 在 `list.js` 文件中给封装的组件添加属性
+```
+<ListItem rowData={rowData} 
+          onSelect={()=>this._loadPage(rowData)}
+/>
+...
+// 实现函数：
+// 通过导航控制器跳转到详情页
+_loadPage(rowData) {
+   /*
+     因为当前的List组件是在Navigator包裹下的，
+     所以可以通过this.props.navigator取到导航控制器进行push
+  */
+  let {navigator} = this.props;
+  if (navigator) {
+    navigator.push({
+      name:'detail',
+      component:Detail
+    })
+  }
+}
+```
+* 在 `listItem` 中给item绑定 `onPress` 事件
+```
+<TouchableOpacity onPress={this.props.onSelect}>
+```
+效果如下：
+![](http://upload-images.jianshu.io/upload_images/3265534-f728dc43ab1dd909.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+##### (8) 处理视频播放功能
+a). 引用第三方视频播放的库[video](https://github.com/react-native-community/react-native-video)，执行终端命令：
+```
+$ npm i -S react-native-video
+$ react-native link
+```
+b). 然后从新编译项目；
+c). 在 `detail.js` 中引入 `'react-native-video'` 组件，实现视频播放的功能
+```
+// 导入播放器
+import Video from 'react-native-video';
+...
+// 这里Video有一些参数设置
+    this.state = {
+      // 服务端返回的数据
+      rowData:this.props.rowData,
+      // 播放速度
+      rate: 1,
+      // 音量
+      volume: 1,
+      // 是否静音
+      muted: false,
+      // 展示模式: 'cover', 'contain', 'stretch'
+      resizeMode: 'contain',
+      // 是否暂停
+      paused: false,
+      // 处理视频进度
+      duration: 0.0,
+      currentTime: 0.0,
+    }
+... 
+```
+具体实现细节请查看源码。
+* 给视频添加简单的加载动画：
+导入 `ActivityIndicator` 组件，
+```
+// 在状态机中定义一个字段，标注是否加载完成视频资源
+ videoLoaded:false
+
+...
+
+// 根据状态在render()中确定需要绘制的内容
+{/* 视频加载动画 */}
+{!this.state.videoLoaded ?
+  <ActivityIndicator
+    color={'red'}
+    size={'large'}
+    style={styles.videoLoad}
+  />
+  : null
+}
+
+... 
+
+// 当视频加载完之后修改状态机中字段的状态
+_onProgress = (data)=> {
+  if (!this.state.videoLoaded) {
+    this.setState({
+      videoLoaded:true
+    })
+  }
+};
+```
+* 给视频添加播放进度条：
+```
+// 设置视频播放进度条（一个是当前时间,一个是剩余时间）
+const flexCompleted = this.getCurrentTimePercentage() * 100;
+const flexRemaining = (1 - this.getCurrentTimePercentage()) * 100;
+
+...
+
+{/* 视频播放进度条 */}
+<View style={styles.progress}>
+  <View style={[styles.innerProgressCompleted, {flex: flexCompleted}]} />
+  <View style={[styles.innerProgressRemaining, {flex: flexRemaining}]} />
+</View>
+
+...
+
+// 计算视频播放进度
+getCurrentTimePercentage() {
+  if (this.state.currentTime > 0) {
+    return parseFloat(this.state.currentTime) / parseFloat(this.state.duration);
+  } else {
+    return 0;
+  }
+}
+```
+效果如下：
+![](http://upload-images.jianshu.io/upload_images/3265534-4855799761c833f9.gif?imageMogr2/auto-orient/strip)
+* 给视频添加重新播放、暂停/继续的功能：
+逻辑和上面如出一辙，不累赘了，具体查看源码。
+##### (9) 处理视频信息的展示
+a). 给视频详情页添加了导航
+```
+{/* 导航栏 */}
+<View style={styles.nav_navStyle}>
+  {/* 返回按钮 */}
+  <TouchableOpacity
+    style={styles.nav_backBox}
+    onPress={this._pop}
+  >
+    <Icon name={'ios-arrow-back'}
+          style={styles.nav_backIcon}
+    />
+    <Text style={styles.nav_backText}>返回</Text>
+  </TouchableOpacity>
+  {/* 标题 */}
+  <Text style={styles.nav_navText} numberOfLines={1}>视频详情页面</Text>
+</View>
+```
+b). 给视频详情页添加作者信息
+* 我在之前的接口中又加入了几个字段来表示作者信息![](http://upload-images.jianshu.io/upload_images/3265534-afb3dc0de4c99b47.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+* 作者信息代码实现（css请查看源码）：
+```
+{/* 底部内容 */}
+<ScrollView
+  enableEmptySections={true}
+  automaticallyAdjustContentInsets={false}
+  showsVerticalScrollIndicator={false}
+>
+  {/* 视频信息 */}
+  <View style={styles.info_infoBox}
+  >
+    <Image
+      style={styles.info_avatar}
+      source={{uri:rowData.author.avatar}}
+    />
+    <View style={styles.info_descBox}>
+      <Text style={styles.info_nickname}>作者：{rowData.author.nickname}</Text>
+      <Text style={styles.info_title}>标题：{rowData.title}</Text>
+    </View>
+  </View>
+</ScrollView>
+```
+效果如下：
+![](http://upload-images.jianshu.io/upload_images/3265534-cee7a09313648fe9.gif?imageMogr2/auto-orient/strip)
+##### (10) 处理评论信息的展示
+a). 在视频信息 `ScrollView` 组件内部加入评论信息的 `ListView` 组件
+```
+{/* 评论信息 */}
+<ListView
+  dataSource={this.state.dataSource}
+  renderRow={this._renderRow}
+  enableEmptySections={true}
+  automaticallyAdjustContentInsets={false}
+  showsVerticalScrollIndicator={false}
+/>
+```
+b). 创建评论列表的接口：![](http://upload-images.jianshu.io/upload_images/3265534-06ece00d8f160b4c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+c). 在 `componentDidMount` 生命周期函数中发送请求，绘制item.
+效果如下：
+![](http://upload-images.jianshu.io/upload_images/3265534-0a8da4fd1f2d69c2.gif?imageMogr2/auto-orient/strip)
 
 
 
