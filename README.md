@@ -51,9 +51,9 @@ $ react-native link
 ## 一、视频模块
 ### 在 `List` 文件夹下创建 `list.js`   
 ### 实现逻辑：
-####（1）使用 `ListView` 组件创建列表：（实现细节请看源码）  
-####（2）列表展示暂时没有真实接口,使用[RAP](http://rapapi.org/org/index.do)模拟假的接口,借用[Mock](http://mockjs.com/)语法,模拟了假数据;在项目中 `npm install mockjs --save` 安装mockjs.      
-####（3）封装请求类：
+#### （1）使用 `ListView` 组件创建列表：（实现细节请看源码）  
+#### （2）列表展示暂时没有真实接口,使用[RAP](http://rapapi.org/org/index.do)模拟假的接口,借用[Mock](http://mockjs.com/)语法,模拟了假数据;在项目中 `npm install mockjs --save` 安装mockjs.      
+#### （3）封装请求类：
 * a). 对请求类进行封装,在 `MyComponent` 文件夹下创建 `Common` 文件;  
 * b). 在 `Common` 文件夹下创建 `config.js` :处理post请求的一些基类参数;  
 * c). 在 `Common` 文件夹下创建 `request.js` :处理 POST/GET 请求;  
@@ -64,7 +64,7 @@ $ react-native link
 ![](http://upload-images.jianshu.io/upload_images/3265534-85d32527f647988f.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-####（4）添加下拉加载更多效果：
+#### （4）添加下拉加载更多效果：
 为了实现分页效果，我在之前rap定义的接口中加入了两个字段。![](http://upload-images.jianshu.io/upload_images/3265534-33bf8cf2b65aaf0f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
  a). 加入加载更多方法
 ```
@@ -238,7 +238,7 @@ api:{
  效果如下：  
  ![](http://upload-images.jianshu.io/upload_images/3265534-5d28081e238d83fb.gif?imageMogr2/auto-orient/strip)
 
-####（7）点击item进入视频详情页        
+#### （7）点击item进入视频详情页        
 a). 之前的页面是没有加导航的。现在在 `App.js` 文件中加入 `Navigator`，实现导航的逻辑(根视图为 `List` 组件)：
 ```
 <Navigator
