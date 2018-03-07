@@ -148,7 +148,7 @@ _renderFooter = ()=> {
 }
 ```
 #### （5）添加下拉刷新逻辑：
-a). 在构造函数中给状态机添加参数 `isRefreshing:false` 记录是否正在下拉刷新；
+a). 在构造函数中给状态机添加参数 `isRefreshing:false` 记录是否正在下拉刷新；      
 b). 加入下拉刷新组件 `refreshControl`
 ```
 在ListView中实现函数：
@@ -293,7 +293,7 @@ a). 引用第三方视频播放的库[video](https://github.com/react-native-com
 $ npm i -S react-native-video
 $ react-native link
 ```
-b). 然后从新编译项目；
+b). 然后从新编译项目；       
 c). 在 `detail.js` 中引入 `'react-native-video'` 组件，实现视频播放的功能
 ```
 // 导入播放器
