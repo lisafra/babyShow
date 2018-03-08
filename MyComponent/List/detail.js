@@ -42,11 +42,11 @@ export default class Detail extends Component {
       // 服务端返回的数据
       rowData:this.props.rowData,
       // 播放速度
-      rate: 10,
+      rate: 1,
       // 音量
       volume: 1,
       // 是否静音
-      muted: true,
+      muted: false,
       // 展示模式: 'cover', 'contain', 'stretch'
       resizeMode: 'contain',
       // 是否暂停

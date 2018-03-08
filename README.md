@@ -442,7 +442,11 @@ b). 创建评论列表的接口：
 c). 在 `componentDidMount` 生命周期函数中发送请求，绘制item.      
 效果如下：     
 ![](http://upload-images.jianshu.io/upload_images/3265534-24aebfa5d476b1f8.gif?imageMogr2/auto-orient/strip)
-
+ * * *     
+ 。     
+ 。       
+ 。        
+ （因为最近比较忙，等后续有时间了接着完成剩余的模块。。。）
 
 * * *
 ## 二、编辑模块
