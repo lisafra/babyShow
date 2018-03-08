@@ -11,7 +11,6 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
-  ScrollView,
   Image,
   ListView
 } from 'react-native';
